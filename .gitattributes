@@ -1,0 +1,6 @@
+*                         text=auto
+.gitattributes            eol=lf
+.gitignore                eol=lf
+*.cs                      diff=csharp
+*.sln                     merge=union
+*.csproj                  merge=union gitlab-language=xml

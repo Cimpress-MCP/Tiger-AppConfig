@@ -42,80 +42,59 @@ namespace Test
         static readonly Encoding s_utf8 = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
 
         [Property(DisplayName = "A plain value is unchanged by normalization.")]
-        public static void PlainValue_Unchanged(ConfigurationKey key, NonEmptyString value, NonNull<AppConfigOptions> appConfigOpts)
+        public static async Task PlainValue_Unchanged(ConfigurationKey key, NonEmptyString value, NonNull<AppConfigOptions> appConfigOpts)
         {
             var datum = new Dictionary<string, string>
             {
                 [key.Get] = value.Get,
             };
-            var handler = Parrot(datum);
+            var handler = CreateParrot(datum);
             using var httpClient = new HttpClient(handler.Object);
 
             var configurationSource = new AppConfigConfigurationSource(httpClient, appConfigOpts.Get);
-            using var sut = new AppConfigConfigurationProvider(configurationSource);
+            await using var sut = new AppConfigConfigurationProvider(configurationSource);
             sut.Load();
 
-            handler
-                .Protected()
-                .Verify(
-                    "SendAsync",
-                    Times.Once(),
-                    ItExpr.IsAny<HttpRequestMessage>(),
-                    ItExpr.IsAny<CancellationToken>());
-            Assert.True(sut.TryGet(key.Get, out var actual));
-            Assert.Equal(value.Get, actual);
+            VerifyParrot(handler);
+            VerifyValue(sut, key.Get, value);
         }
 
         [Property(DisplayName = "A compound value is unchanged by normalization.")]
-        public static void CompoundValue_Normalized(ConfigurationKey[] key, NonEmptyString value, NonNull<AppConfigOptions> appConfigOpts)
+        public static async Task CompoundValue_Normalized(ConfigurationKey[] key, NonEmptyString value, NonNull<AppConfigOptions> appConfigOpts)
         {
             var compoundKey = ConfigurationPath.Combine(key.Select(k => k.Get));
             var datum = new Dictionary<string, string>
             {
                 [compoundKey] = value.Get,
             };
-            var handler = Parrot(datum);
+            var handler = CreateParrot(datum);
             using var httpClient = new HttpClient(handler.Object);
 
             var configurationSource = new AppConfigConfigurationSource(httpClient, appConfigOpts.Get);
-            using var sut = new AppConfigConfigurationProvider(configurationSource);
+            await using var sut = new AppConfigConfigurationProvider(configurationSource);
             sut.Load();
 
-            handler
-                .Protected()
-                .Verify(
-                    "SendAsync",
-                    Times.Once(),
-                    ItExpr.IsAny<HttpRequestMessage>(),
-                    ItExpr.IsAny<CancellationToken>());
-            Assert.True(sut.TryGet(compoundKey, out var actual));
-            Assert.Equal(value.Get, actual);
+            VerifyParrot(handler);
+            VerifyValue(sut, compoundKey, value);
         }
 
         [Property(DisplayName = "A deep value is normalized.")]
-        public static void DeepValue_Normalized(
+        public static async Task DeepValue_Normalized(
             NonEmptyArray<ConfigurationKey> key,
             NonEmptyString value,
             NonNull<AppConfigOptions> appConfigOpts)
         {
             var datum = GenerateDatum(key.Get, value.Get);
-            var handler = Parrot(datum);
+            var handler = CreateParrot(datum);
             using var httpClient = new HttpClient(handler.Object);
 
             var configurationSource = new AppConfigConfigurationSource(httpClient, appConfigOpts.Get);
-            using var sut = new AppConfigConfigurationProvider(configurationSource);
+            await using var sut = new AppConfigConfigurationProvider(configurationSource);
             sut.Load();
 
             var compoundKey = ConfigurationPath.Combine(key.Get.Select(k => k.Get));
-            handler
-                .Protected()
-                .Verify(
-                    "SendAsync",
-                    Times.Once(),
-                    ItExpr.IsAny<HttpRequestMessage>(),
-                    ItExpr.IsAny<CancellationToken>());
-            Assert.True(sut.TryGet(compoundKey, out var actual));
-            Assert.Equal(value.Get, actual);
+            VerifyParrot(handler);
+            VerifyValue(sut, compoundKey, value);
 
             static ImmutableDictionary<string, object> GenerateDatum(ReadOnlySpan<ConfigurationKey> k, string v)
             {
@@ -129,7 +108,7 @@ namespace Test
             }
         }
 
-        static Mock<HttpMessageHandler> Parrot<T>(T body)
+        static Mock<HttpMessageHandler> CreateParrot<T>(T body)
         {
             var handler = new Mock<HttpMessageHandler>();
             _ = handler
@@ -143,6 +122,20 @@ namespace Test
                     Content = new StringContent(JsonSerializer.Serialize(body), s_utf8, Application.Octet),
                 });
             return handler;
+        }
+
+        static void VerifyParrot(Mock<HttpMessageHandler> handler) => handler
+            .Protected()
+            .Verify(
+                "SendAsync",
+                Times.Once(),
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>());
+
+        static void VerifyValue(AppConfigConfigurationProvider provider, string key, NonEmptyString value)
+        {
+            Assert.True(provider.TryGet(key, out var actual));
+            Assert.Equal(value.Get, actual);
         }
     }
 }

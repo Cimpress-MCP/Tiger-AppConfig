@@ -6,15 +6,18 @@
 
   <ItemGroup>
     <PackageReference Include="FsCheck.Xunit" Version="3.0.0-alpha5" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.3" />
-    <PackageReference Include="Moq" Version="4.16.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
+    <PackageReference Include="Moq" Version="4.16.1" />
+    <PackageReference Include="System.Interactive" Version="5.0.0" />
     <PackageReference Include="xunit" Version="2.4.1" />
 
-    <PackageReference Include="coverlet.collector" Version="3.0.2" PrivateAssets="all" />
-    <PackageReference Include="JunitXml.TestLogger" Version="2.1.81" PrivateAssets="all" />
+    <PackageReference Include="coverlet.collector" Version="3.0.3" PrivateAssets="all" />
+    <PackageReference Include="JunitXml.TestLogger" Version="3.0.87" PrivateAssets="all" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3" PrivateAssets="all" />
 
     <ProjectReference Include="..\src\Tiger.AppConfig\Tiger.AppConfig.csproj" />
+
+    <None Update="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   
 </Project>

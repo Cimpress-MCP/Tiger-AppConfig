@@ -35,21 +35,25 @@ namespace Microsoft.Extensions.Configuration
 
         /// <summary>Adds AWS AppConfig as a configuration source.</summary>
         /// <param name="builder">The configuration builder to which to add.</param>
+        /// <param name="configurationSection">
+        /// The name of the configuration section at which to find configuration.
+        /// </param>
         /// <returns>The modified configuration builder.</returns>
         public static IConfigurationBuilder AddAppConfig(
-            this IConfigurationBuilder builder)
+            this IConfigurationBuilder builder,
+            string configurationSection = AppConfigOptions.AppConfig)
         {
-            if (builder is not { } b)
+            if (builder is null)
             {
                 throw new ArgumentNullException(nameof(builder));
             }
 
             var httpClient = new HttpClient(s_handler, disposeHandler: false);
-            var appConfigOpts = GetOptions(b);
-            return b.Add(new AppConfigConfigurationSource(httpClient, appConfigOpts));
+            var appConfigOpts = GetOptions(builder, configurationSection);
+            return builder.Add(new AppConfigConfigurationSource(httpClient, appConfigOpts));
         }
 
-        static AppConfigOptions GetOptions(IConfigurationBuilder builder)
+        static AppConfigOptions GetOptions(IConfigurationBuilder builder, string configurationSection)
         {
             const string AppConfigConfigurationKey = "TIGER_CONFIGBUILDER_APPCONFIG";
 
@@ -62,7 +66,7 @@ namespace Microsoft.Extensions.Configuration
                  * band-but-untyped communication is exactly what `Properties` is for.
                  */
                 var configuration = builder.AddEnvironmentVariables("AWS_APPCONFIG_EXTENSION_").Build();
-                appConfigOpts = configuration.GetSection(AppConfigOptions.AppConfig).Get<AppConfigOptions>();
+                appConfigOpts = configuration.GetSection(configurationSection).Get<AppConfigOptions>();
                 configuration.Bind(appConfigOpts, o => o.BindNonPublicProperties = true);
                 builder.Properties.Add(AppConfigConfigurationKey, appConfigOpts);
             }

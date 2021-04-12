@@ -1,11 +1,11 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <TargetFrameworks>$(TargetFrameworks);netcoreapp3.1</TargetFrameworks>
     <Description>Integrates AWS AppConfig into the Microsoft.Extensions.Configuration ecosystem.</Description>
     <AssemblyTitle>Tiger AppConfig</AssemblyTitle>
     <VersionPrefix>1.0.0</VersionPrefix>
     <Authors>cosborn@cimpress.com</Authors>
-    <TargetFrameworks>$(TargetFrameworks);netcoreapp3.1</TargetFrameworks>
     <AssemblyName>Tiger.AppConfig</AssemblyName>
     <PackageId>Tiger.AppConfig</PackageId>
     <IncludeSymbols>true</IncludeSymbols>
@@ -23,30 +23,15 @@
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
   </PropertyGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
-    <PackageReference Include="System.Net.Http.Json" Version="3.2.0" />
-  </ItemGroup>
-
   <ItemGroup>
     <None Include="../../tiger_logo.png" Pack="True" PackagePath="" />
 
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="3.1.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="3.1.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="3.1.0" />
+    <PackageReference Include="Nito.AsyncEx.Coordination" Version="5.1.0" />
 
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="all" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="Properties\Resources.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <EmbeddedResource Update="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

@@ -9,8 +9,7 @@
       "newlineAtEndOfFile": "require"
     },
     "namingRules": {
-      "includeInferredTupleElementNames": true,
-      "tupleElementNameCasing": "camelCase"
+      "includeInferredTupleElementNames": true
     }
   }
 }

@@ -30,6 +30,7 @@ using Tiger.AppConfig;
 using static System.Globalization.CultureInfo;
 using static System.Uri;
 using static Tiger.AppConfig.Resources;
+using J = System.Text.Json.JsonValueKind;
 
 namespace Microsoft.Extensions.Configuration
 {
@@ -141,7 +142,7 @@ namespace Microsoft.Extensions.Configuration
                 var rawDoc = await _httpClient.GetStringAsync(uriBuilder.Uri).ConfigureAwait(false);
                 using var doc = JsonDocument.Parse(rawDoc);
 #endif
-                if (doc is not { RootElement: { ValueKind: JsonValueKind.Object } root })
+                if (doc is not { RootElement: { ValueKind: J.Object } root })
                 {
                     throw new FormatException(string.Format(InvariantCulture, NotObject, doc?.RootElement.ValueKind));
                 }
@@ -241,13 +242,13 @@ namespace Microsoft.Extensions.Configuration
             {
                 switch (value)
                 {
-                    case { ValueKind: JsonValueKind.Object } v:
-                        VisitObject(v, context, data);
+                    case { ValueKind: J.Object } o:
+                        VisitObject(o, context, data);
                         break;
-                    case { ValueKind: JsonValueKind.Array } v:
-                        VisitArray(v, context, data);
+                    case { ValueKind: J.Array } a:
+                        VisitArray(a, context, data);
                         break;
-                    case { ValueKind: JsonValueKind.String or JsonValueKind.Number or JsonValueKind.True or JsonValueKind.False or JsonValueKind.Null } v:
+                    case { ValueKind: J.String or J.Number or J.True or J.False or J.Null } v:
                         var key = ConfigurationPath.Combine(context);
 
                         // note(cosborn) If you create JSON with duplicate keys, you get what you get.

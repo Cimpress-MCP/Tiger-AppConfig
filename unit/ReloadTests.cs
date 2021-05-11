@@ -30,7 +30,7 @@ namespace Test
         {
             using var httpClient = new HttpClient();
             var configurationSource = new AppConfigConfigurationSource(httpClient, new AppConfigOptions());
-            await using var sut = new AppConfigConfigurationProvider(configurationSource);
+            using var sut = new AppConfigConfigurationProvider(configurationSource);
 
             // note(cosborn) Assertion controlled by the "longRunningTestSeconds" parameter in `xunit.runner.json`.
             await sut.WaitForReloadToCompleteAsync();

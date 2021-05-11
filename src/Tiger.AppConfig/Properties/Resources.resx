@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="Preamble" xml:space="preserve">
+    <value><![CDATA[[Tiger.AppConfig] {0}]]></value>
+  </data>
+  <data name="FailedToContact" xml:space="preserve">
+    <value><![CDATA[Failed to contact AppConfig extension!]]></value>
+  </data>
+  <data name="FailedToContactWithStatusCode" xml:space="preserve">
+    <value><![CDATA[Failed to contact AppConfig extension, received '{0}'!]]></value>
+  </data>
+  <data name="TimedOut" xml:space="preserve">
+    <value><![CDATA[Timed out trying to contact AppConfig extension!]]></value>
+  </data>
+  <data name="Canceled" xml:space="preserve">
+    <value><![CDATA[Request was canceled when trying to contact AppConfig extension.]]></value>
+  </data>
+  <data name="DeserializationFailed" xml:space="preserve">
+    <value><![CDATA[Response from AppConfig could not be deserialized from JSON!]]></value>
+  </data>
+  <data name="NotObject" xml:space="preserve">
+    <value><![CDATA[Top-level JSON element must be an object! Instead, '{0}' was found.]]></value>
+  </data>
+  <data name="UsingCache" xml:space="preserve">
+    <value><![CDATA[Using cached configuration value for this refresh cycle…]]></value>
+  </data>
+</root>

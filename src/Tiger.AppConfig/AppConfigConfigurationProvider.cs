@@ -1,4 +1,4 @@
-﻿// <copyright file="AppConfigConfigurationProvider.cs" company="Cimpress, Inc.">
+// <copyright file="AppConfigConfigurationProvider.cs" company="Cimpress, Inc.">
 //   Copyright 2021 Cimpress, Inc.
 //
 //   Licensed under the Apache License, Version 2.0 (the "License") –
@@ -24,23 +24,27 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Primitives;
 using Nito.AsyncEx;
 using Tiger.AppConfig;
 using static System.Globalization.CultureInfo;
 using static System.Uri;
+using static Tiger.AppConfig.Resources;
 
 namespace Microsoft.Extensions.Configuration
 {
     /// <summary>Provides AWS AppConfig configuration key/values for an application.</summary>
     public sealed class AppConfigConfigurationProvider
-        : ConfigurationProvider, IDisposable, IAsyncDisposable
+        : ConfigurationProvider, IDisposable
     {
         readonly HttpClient _httpClient;
         readonly AppConfigOptions _appConfigOpts;
         readonly ConfigurationEqualityComparer _equalityComparer;
-        readonly Timer _timer;
+        readonly IDisposable _subscription;
 
         readonly AsyncManualResetEvent _reloadEvent = new(set: true);
+
+        int _dataHashCode;
 
         /// <summary>Initializes a new instance of the <see cref="AppConfigConfigurationProvider"/> class.</summary>
         /// <param name="configurationSource">The source of AWS AppConfig configuration.</param>
@@ -55,11 +59,23 @@ namespace Microsoft.Extensions.Configuration
             _httpClient = cs.HttpClient;
             _appConfigOpts = cs.Options;
             _equalityComparer = cs.EqualityComparer;
-            _timer = new(
-                p => Reload((AppConfigConfigurationProvider)p!),
-                this,
-                dueTime: _appConfigOpts.PollInterval,
-                period: _appConfigOpts.PollInterval);
+
+            /* note(cosborn)
+             * I originally had an implementation here which used a
+             * System.Threading.Timer to avoid potentially leaking the
+             * cancellation token source. But it may be that this
+             * caused invocations to pile up on each other.
+             *
+             * I don't know whether we're OK on leaking the CTS; Microsoft
+             * oddly only calls out using `CancelAfter`, not the constructor
+             * which accepts a `TimeSpan`. But... I can't imagine their
+             * working any differently from one another, so I'm not sure.
+             */
+
+            _subscription = ChangeToken.OnChange(
+                () => new CancellationChangeToken(new CancellationTokenSource(_appConfigOpts.PollInterval).Token),
+                Reload,
+                this);
         }
 
         /// <summary>
@@ -76,21 +92,22 @@ namespace Microsoft.Extensions.Configuration
         public Task WaitForReloadToCompleteAsync(CancellationToken cancellationToken = default) =>
             _reloadEvent.WaitAsync(cancellationToken);
 
-        /// <inheritdoc/> // because(cosborn) Configuration is a sync API – we want good exceptions. Gross, gross, gross.
-        public override void Load() => Task.Run(LoadCoreAsync).GetAwaiter().GetResult();
+        /// <inheritdoc/>
+        public override void Load() => // because(cosborn) Configuration is sync – we want good exceptions.
+            Task.Run(LoadCoreAsync).GetAwaiter().GetResult();
+
+        /// <inheritdoc/>
+        public override void Set(string key, string value)
+        {
+            base.Set(key, value);
+            _dataHashCode = _equalityComparer.GetHashCode(Data);
+        }
 
         /// <inheritdoc/>
         public void Dispose()
         {
             _httpClient.Dispose();
-            _timer.Dispose();
-        }
-
-        /// <inheritdoc/>
-        public async ValueTask DisposeAsync()
-        {
-            _httpClient.Dispose();
-            await _timer.DisposeAsync().ConfigureAwait(false);
+            _subscription.Dispose();
         }
 
         // hack(cosborn) async void is una-void-able because it's an event handler.
@@ -114,29 +131,65 @@ namespace Microsoft.Extensions.Configuration
                 host: "localhost",
                 port: _appConfigOpts.HttpPort,
                 pathValue: _appConfigOpts.Path);
-#if NET5_0
-            using var doc = await _httpClient.GetFromJsonAsync<JsonDocument>(uriBuilder.Uri).ConfigureAwait(false);
-#else
-            // note(cosborn) The netcoreapp3.1 version of GetFromJsonAsync bails on non-JSON content-types.
-            // todo(cosborn) Why does the extension send application/octet-stream? It knows the content type.
-            var rawDoc = await _httpClient.GetStringAsync(uriBuilder.Uri).ConfigureAwait(false);
-            using var doc = JsonDocument.Parse(rawDoc);
-#endif
-
-            if (doc is not { RootElement: { ValueKind: JsonValueKind.Object } root })
+            try
             {
-                throw new FormatException($"Top-level JSON element must be an object. Instead, '{doc?.RootElement.ValueKind}' was found.");
+#if NET5_0
+                using var doc = await _httpClient.GetFromJsonAsync<JsonDocument>(uriBuilder.Uri).ConfigureAwait(false);
+#else
+                // note(cosborn) The netcoreapp3.1 version of GetFromJsonAsync bails on non-JSON content-types.
+                // todo(cosborn) Why does the extension send application/octet-stream? It knows the content type.
+                var rawDoc = await _httpClient.GetStringAsync(uriBuilder.Uri).ConfigureAwait(false);
+                using var doc = JsonDocument.Parse(rawDoc);
+#endif
+                if (doc is not { RootElement: { ValueKind: JsonValueKind.Object } root })
+                {
+                    throw new FormatException(string.Format(InvariantCulture, NotObject, doc?.RootElement.ValueKind));
+                }
+
+                // note(cosborn) JsonDocuments lack well-behaved equality, so we have to normalize first.
+                var updatedData = NormalizeData(root);
+                var updatedDataHashCode = _equalityComparer.GetHashCode(updatedData);
+
+                if (updatedDataHashCode != _dataHashCode || !_equalityComparer.Equals(updatedData, Data))
+                {
+                    Data = updatedData;
+                    _dataHashCode = updatedDataHashCode;
+                    OnReload();
+                }
+            }
+#if NET5_0
+            catch (HttpRequestException hre)
+            {
+                Log(string.Format(InvariantCulture, FailedToContact, hre.StatusCode));
+            }
+            catch (OperationCanceledException oce) when (oce.InnerException is TimeoutException)
+            {
+                Log(TimedOut);
+            }
+#else
+            catch (HttpRequestException)
+            {
+                LogAndContinue(FailedToContact);
+            }
+#endif
+            catch (OperationCanceledException)
+            {
+                /* note(cosborn)
+                 * In netcoreapp3.1 or less, this *could* mean a timeout.
+                 * No way of knowing, unfortunately.
+                 */
+                Log(Canceled);
+            }
+            catch (JsonException)
+            {
+                Log(DeserializationFailed);
+                throw;
             }
 
-            // note(csoborn) JsonDocuments lack well-behaved equality, so we have to normalize first.
-            var updatedData = NormalizeData(root);
-
-            // note(cosborn) Values can be `Set` into Data at any time, so we can't cache the hash.
-            if (_equalityComparer.GetHashCode(updatedData) != _equalityComparer.GetHashCode(Data)
-                || !_equalityComparer.Equals(updatedData, Data))
+            static void Log(string message)
             {
-                Data = updatedData;
-                OnReload();
+                Console.WriteLine(Preamble, message);
+                Console.WriteLine(UsingCache);
             }
         }
 
@@ -164,7 +217,7 @@ namespace Microsoft.Extensions.Configuration
             VisitObject(root, ImmutableArray<string>.Empty, data);
             return data;
 
-            static void VisitObject(JsonElement @object, ImmutableArray<string> context, IDictionary<string, string> data)
+            static void VisitObject(JsonElement @object, ImmutableArray<string> context, Dictionary<string, string> data)
             {
                 foreach (var property in @object.EnumerateObject())
                 {
@@ -172,7 +225,7 @@ namespace Microsoft.Extensions.Configuration
                 }
             }
 
-            static void VisitArray(JsonElement array, ImmutableArray<string> context, IDictionary<string, string> data)
+            static void VisitArray(JsonElement array, ImmutableArray<string> context, Dictionary<string, string> data)
             {
                 for (var i = 0; i < array.GetArrayLength(); i++)
                 {
@@ -184,7 +237,7 @@ namespace Microsoft.Extensions.Configuration
                 }
             }
 
-            static void VisitValue(JsonElement value, ImmutableArray<string> context, IDictionary<string, string> data)
+            static void VisitValue(JsonElement value, ImmutableArray<string> context, Dictionary<string, string> data)
             {
                 switch (value)
                 {

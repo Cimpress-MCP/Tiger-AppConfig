@@ -21,7 +21,7 @@ namespace Tiger.AppConfig
 {
     /// <summary>Compares configurations for diffing purposes.</summary>
     public sealed class ConfigurationEqualityComparer
-        : IEqualityComparer<IDictionary<string, string>>
+        : EqualityComparer<IDictionary<string, string>>
     {
         /* note(cosborn)
          * As in the configuration provider, keys are compared case-insensitively.
@@ -36,7 +36,7 @@ namespace Tiger.AppConfig
         public IEqualityComparer<string> KeyComparer { get; } = StringComparer.OrdinalIgnoreCase;
 
         /// <inheritdoc/>
-        public bool Equals(IDictionary<string, string>? x, IDictionary<string, string>? y)
+        public override bool Equals(IDictionary<string, string>? x, IDictionary<string, string>? y)
         {
             if (ReferenceEquals(x, y))
             {
@@ -60,7 +60,7 @@ namespace Tiger.AppConfig
         }
 
         /// <inheritdoc/>
-        public int GetHashCode(IDictionary<string, string> obj)
+        public override int GetHashCode(IDictionary<string, string> obj)
         {
             if (obj is null)
             {

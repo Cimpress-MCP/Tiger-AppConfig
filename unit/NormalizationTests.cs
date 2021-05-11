@@ -42,7 +42,7 @@ namespace Test
         static readonly Encoding s_utf8 = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
 
         [Property(DisplayName = "A plain value is unchanged by normalization.")]
-        public static async Task PlainValue_Unchanged(ConfigurationKey key, NonEmptyString value, NonNull<AppConfigOptions> appConfigOpts)
+        public static void PlainValue_Unchanged(ConfigurationKey key, NonEmptyString value, NonNull<AppConfigOptions> appConfigOpts)
         {
             var datum = new Dictionary<string, string>
             {
@@ -52,7 +52,7 @@ namespace Test
             using var httpClient = new HttpClient(handler.Object);
 
             var configurationSource = new AppConfigConfigurationSource(httpClient, appConfigOpts.Get);
-            await using var sut = new AppConfigConfigurationProvider(configurationSource);
+            using var sut = new AppConfigConfigurationProvider(configurationSource);
             sut.Load();
 
             VerifyParrot(handler);
@@ -60,7 +60,7 @@ namespace Test
         }
 
         [Property(DisplayName = "A compound value is unchanged by normalization.")]
-        public static async Task CompoundValue_Normalized(ConfigurationKey[] key, NonEmptyString value, NonNull<AppConfigOptions> appConfigOpts)
+        public static void CompoundValue_Normalized(ConfigurationKey[] key, NonEmptyString value, NonNull<AppConfigOptions> appConfigOpts)
         {
             var compoundKey = ConfigurationPath.Combine(key.Select(k => k.Get));
             var datum = new Dictionary<string, string>
@@ -71,7 +71,7 @@ namespace Test
             using var httpClient = new HttpClient(handler.Object);
 
             var configurationSource = new AppConfigConfigurationSource(httpClient, appConfigOpts.Get);
-            await using var sut = new AppConfigConfigurationProvider(configurationSource);
+            using var sut = new AppConfigConfigurationProvider(configurationSource);
             sut.Load();
 
             VerifyParrot(handler);
@@ -79,7 +79,7 @@ namespace Test
         }
 
         [Property(DisplayName = "A deep value is normalized.")]
-        public static async Task DeepValue_Normalized(
+        public static void DeepValue_Normalized(
             NonEmptyArray<ConfigurationKey> key,
             NonEmptyString value,
             NonNull<AppConfigOptions> appConfigOpts)
@@ -89,7 +89,7 @@ namespace Test
             using var httpClient = new HttpClient(handler.Object);
 
             var configurationSource = new AppConfigConfigurationSource(httpClient, appConfigOpts.Get);
-            await using var sut = new AppConfigConfigurationProvider(configurationSource);
+            using var sut = new AppConfigConfigurationProvider(configurationSource);
             sut.Load();
 
             var compoundKey = ConfigurationPath.Combine(key.Get.Select(k => k.Get));

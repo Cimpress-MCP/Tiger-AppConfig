@@ -170,7 +170,7 @@ namespace Microsoft.Extensions.Configuration
 #else
             catch (HttpRequestException)
             {
-                LogAndContinue(FailedToContact);
+                Log(FailedToContact);
             }
 #endif
             catch (OperationCanceledException)

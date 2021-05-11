@@ -67,7 +67,7 @@ namespace Microsoft.Extensions.Configuration
                  */
                 var configuration = builder.AddEnvironmentVariables("AWS_APPCONFIG_EXTENSION_").Build();
                 appConfigOpts = configuration.GetSection(configurationSection).Get<AppConfigOptions>();
-                configuration.Bind(appConfigOpts, o => o.BindNonPublicProperties = true);
+                configuration.Bind(appConfigOpts);
                 builder.Properties.Add(AppConfigConfigurationKey, appConfigOpts);
             }
 

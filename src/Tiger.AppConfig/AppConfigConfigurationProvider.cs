@@ -137,8 +137,8 @@ namespace Microsoft.Extensions.Configuration
 #if NET5_0
                 using var doc = await _httpClient.GetFromJsonAsync<JsonDocument>(uriBuilder.Uri).ConfigureAwait(false);
 #else
-                // note(cosborn) The netcoreapp3.1 version of GetFromJsonAsync bails on non-JSON content-types.
-                // todo(cosborn) Why does the extension send application/octet-stream? It knows the content type.
+                // note(cosborn) The netcoreapp3.1 version of GetFromJsonAsync bails on non-JSON content types.
+                // todo(cosborn) Why *does* the extension send application/octet-stream? It knows the content type.
                 var rawDoc = await _httpClient.GetStringAsync(uriBuilder.Uri).ConfigureAwait(false);
                 using var doc = JsonDocument.Parse(rawDoc);
 #endif
@@ -161,36 +161,40 @@ namespace Microsoft.Extensions.Configuration
 #if NET5_0
             catch (HttpRequestException hre)
             {
-                Log(string.Format(InvariantCulture, FailedToContact, hre.StatusCode));
-            }
-            catch (OperationCanceledException oce) when (oce.InnerException is TimeoutException)
-            {
-                Log(TimedOut);
+                Log(hre, string.Format(InvariantCulture, FailedToContact, hre.StatusCode));
             }
 #else
-            catch (HttpRequestException)
+            catch (HttpRequestException hre)
             {
-                Log(FailedToContact);
+                Log(hre, FailedToContact);
             }
 #endif
-            catch (OperationCanceledException)
+            catch (OperationCanceledException oce) when (oce.InnerException is TimeoutException)
+            {
+                Log(oce, TimedOut);
+            }
+            catch (OperationCanceledException oce)
             {
                 /* note(cosborn)
                  * In netcoreapp3.1 or less, this *could* mean a timeout.
                  * No way of knowing, unfortunately.
                  */
-                Log(Canceled);
+                Log(oce, Canceled);
             }
-            catch (JsonException)
+            catch (JsonException je)
             {
-                Log(DeserializationFailed);
+                Log(je, DeserializationFailed);
                 throw;
             }
 
-            static void Log(string message)
+            static void Log<TException>(TException e, string message)
+                where TException : Exception
             {
-                Console.WriteLine(Preamble, message);
-                Console.WriteLine(UsingCache);
+                Log(e.Message);
+                Log(message);
+                Log(UsingCache);
+
+                static void Log(string message) => Console.WriteLine(Preamble, message);
             }
         }
 

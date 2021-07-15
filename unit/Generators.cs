@@ -14,6 +14,8 @@
 //   limitations under the License.
 // </copyright>
 
+using System.Collections.Generic;
+using System.Linq;
 using FsCheck;
 using Tiger.AppConfig;
 using static System.StringComparison;
@@ -34,7 +36,7 @@ namespace Test
             {
                 Application = paths.Item1.Get,
                 Environment = paths.Item2.Get,
-                Configuration = paths.Item3.Get,
+                ConfigurationProfile = paths.Item3.Get,
                 HttpPort = port,
             });
     }

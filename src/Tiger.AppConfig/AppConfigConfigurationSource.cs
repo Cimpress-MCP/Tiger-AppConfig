@@ -14,7 +14,7 @@
 //   limitations under the License.
 // </copyright>
 
-using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using Tiger.AppConfig;
 
@@ -40,6 +40,11 @@ namespace Microsoft.Extensions.Configuration
 
         /// <summary>Gets the application's configuration options for AWS AppConfig.</summary>
         public AppConfigOptions Options { get; }
+
+        /// <summary>
+        /// Gets the equality comparer used to determine whether configuration should be reloaded.
+        /// </summary>
+        public ConfigurationEqualityComparer EqualityComparer { get; } = new();
 
         /// <inheritdoc/>
         IConfigurationProvider IConfigurationSource.Build(IConfigurationBuilder builder) =>

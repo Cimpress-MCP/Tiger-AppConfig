@@ -66,8 +66,9 @@ namespace Microsoft.Extensions.Configuration
                  * band-but-untyped communication is exactly what `Properties` is for.
                  */
                 var configuration = builder.AddEnvironmentVariables("AWS_APPCONFIG_EXTENSION_").Build();
-                appConfigOpts = configuration.GetSection(configurationSection).Get<AppConfigOptions>();
+                appConfigOpts = new();
                 configuration.Bind(appConfigOpts);
+                configuration.GetSection(configurationSection).Bind(appConfigOpts);
                 builder.Properties.Add(AppConfigConfigurationKey, appConfigOpts);
             }
 

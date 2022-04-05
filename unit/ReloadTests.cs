@@ -14,26 +14,22 @@
 //   limitations under the License.
 // </copyright>
 
-using System.Net.Http;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Tiger.AppConfig;
-using Xunit;
 
-namespace Test
+namespace Test;
+
+/// <summary>Tests of reloading configuration.</summary>
+public static class ReloadTests
 {
-    /// <summary>Tests of reloading configuration.</summary>
-    public static class ReloadTests
+    [Fact(DisplayName = "If no reload is occurring, the wait should be effectively immediate.")]
+    public static async Task NoReload_OK()
     {
-        [Fact(DisplayName = "If no reload is occurring, the wait should be effectively immediate.")]
-        public static async Task NoReload_OK()
-        {
-            using var httpClient = new HttpClient();
-            var configurationSource = new AppConfigConfigurationSource(httpClient, new AppConfigOptions());
-            using var sut = new AppConfigConfigurationProvider(configurationSource);
+        using var httpClient = new HttpClient();
+        var configurationSource = new AppConfigConfigurationSource(httpClient, new AppConfigOptions());
+        using var sut = new AppConfigConfigurationProvider(configurationSource);
 
-            // note(cosborn) Assertion controlled by the "longRunningTestSeconds" parameter in `xunit.runner.json`.
-            await sut.WaitForReloadToCompleteAsync();
-        }
+        // note(cosborn) Assertion controlled by the "longRunningTestSeconds" parameter in `xunit.runner.json`.
+        await sut.WaitForReloadToCompleteAsync();
     }
 }

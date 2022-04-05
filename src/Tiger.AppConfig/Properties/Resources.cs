@@ -16,48 +16,42 @@
 
 using System.ComponentModel;
 using System.Resources;
-using System.Threading;
 using static System.ComponentModel.EditorBrowsableState;
 
-namespace Tiger.AppConfig
+namespace Tiger.AppConfig;
+
+/// <summary>A strongly typed resource class for looking up localized strings, etc.</summary>
+static class Resources
 {
-    /// <summary>A strongly typed resource class for looking up localized strings, etc.</summary>
-    static class Resources
-    {
-        static ResourceManager? s_resourceManager;
-        static object s_resourceManagerLock = new();
+    static ResourceManager? s_resourceManager;
+    static object s_resourceManagerLock = new();
 
-        /// <summary>Gets the cached <see cref="ResourceManager"/> instance used by this class.</summary>
-        [EditorBrowsable(Advanced)]
-        public static ResourceManager ResourceManager => LazyInitializer.EnsureInitialized(
-            ref s_resourceManager,
-            ref s_resourceManagerLock,
-            () => new ResourceManager("Tiger.AppConfig.Resources", typeof(Resources).Assembly));
+    /// <summary>Gets the cached <see cref="ResourceManager"/> instance used by this class.</summary>
+    [EditorBrowsable(Advanced)]
+    public static ResourceManager ResourceManager => LazyInitializer.EnsureInitialized(
+        ref s_resourceManager,
+        ref s_resourceManagerLock,
+        () => new ResourceManager("Tiger.AppConfig.Resources", typeof(Resources).Assembly));
 
-        /// <summary>Gets the standard log message prefix.</summary>
-        public static string Preamble => ResourceManager.GetString(nameof(Preamble), null)!;
+    /// <summary>Gets the standard log message prefix.</summary>
+    public static string Preamble => ResourceManager.GetString(nameof(Preamble), null)!;
 
-        /// <summary>Gets the timeout message.</summary>
-        public static string TimedOut => ResourceManager.GetString(nameof(TimedOut), null)!;
+    /// <summary>Gets the timeout message.</summary>
+    public static string TimedOut => ResourceManager.GetString(nameof(TimedOut), null)!;
 
-        /// <summary>Gets the request failure message.</summary>
-        public static string FailedToContact =>
-#if NET5_0
-            ResourceManager.GetString(nameof(FailedToContact) + "WithStatusCode", null)!;
-#else
-            ResourceManager.GetString(nameof(FailedToContact), null)!;
-#endif
+    /// <summary>Gets the request failure message.</summary>
+    public static string FailedToContact =>
+        ResourceManager.GetString(nameof(FailedToContact) + "WithStatusCode", null)!;
 
-        /// <summary>Gets the request cancellation message.</summary>
-        public static string Canceled => ResourceManager.GetString(nameof(Canceled), null)!;
+    /// <summary>Gets the request cancellation message.</summary>
+    public static string Canceled => ResourceManager.GetString(nameof(Canceled), null)!;
 
-        /// <summary>Gets the message indicating malformed JSON.</summary>
-        public static string DeserializationFailed => ResourceManager.GetString(nameof(DeserializationFailed), null)!;
+    /// <summary>Gets the message indicating malformed JSON.</summary>
+    public static string DeserializationFailed => ResourceManager.GetString(nameof(DeserializationFailed), null)!;
 
-        /// <summary>Gets the message indicating invalid JSON.</summary>
-        public static string NotObject => ResourceManager.GetString(nameof(NotObject), null)!;
+    /// <summary>Gets the message indicating invalid JSON.</summary>
+    public static string NotObject => ResourceManager.GetString(nameof(NotObject), null)!;
 
-        /// <summary>Gets the suffix describing the user of a potentially stale cache.</summary>
-        public static string UsingCache => ResourceManager.GetString(nameof(UsingCache), null)!;
-    }
+    /// <summary>Gets the suffix describing the user of a potentially stale cache.</summary>
+    public static string UsingCache => ResourceManager.GetString(nameof(UsingCache), null)!;
 }

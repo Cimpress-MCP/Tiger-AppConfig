@@ -14,70 +14,66 @@
 //   limitations under the License.
 // </copyright>
 
-using System;
-using System.Collections.Generic;
+namespace Tiger.AppConfig;
 
-namespace Tiger.AppConfig
+/// <summary>Compares configurations for diffing purposes.</summary>
+public sealed class ConfigurationEqualityComparer
+    : EqualityComparer<IDictionary<string, string>>
 {
-    /// <summary>Compares configurations for diffing purposes.</summary>
-    public sealed class ConfigurationEqualityComparer
-        : EqualityComparer<IDictionary<string, string>>
+    /* note(cosborn)
+     * As in the configuration provider, keys are compared case-insensitively.
+     * Values can be different based on casing, however, so we get stricter.
+     */
+
+    static readonly IEqualityComparer<string> s_valueComparer = StringComparer.Ordinal;
+
+    /// <summary>
+    /// Gets the equality comparer that is used to determine equality of configuration keys.
+    /// </summary>
+    public IEqualityComparer<string> KeyComparer { get; } = StringComparer.OrdinalIgnoreCase;
+
+    /// <inheritdoc/>
+    public override bool Equals(IDictionary<string, string>? x, IDictionary<string, string>? y)
     {
-        /* note(cosborn)
-         * As in the configuration provider, keys are compared case-insensitively.
-         * Values can be different based on casing, however, so we get stricter.
-         */
-
-        static readonly IEqualityComparer<string> s_valueComparer = StringComparer.Ordinal;
-
-        /// <summary>
-        /// Gets the equality comparer that is used to determine equality of configuration keys.
-        /// </summary>
-        public IEqualityComparer<string> KeyComparer { get; } = StringComparer.OrdinalIgnoreCase;
-
-        /// <inheritdoc/>
-        public override bool Equals(IDictionary<string, string>? x, IDictionary<string, string>? y)
+        if (ReferenceEquals(x, y))
         {
-            if (ReferenceEquals(x, y))
-            {
-                return true;
-            }
-
-            if (x is null || y is null || x.Count != y.Count)
-            {
-                return false;
-            }
-
-            foreach (var (key, value) in x)
-            {
-                if (!y.TryGetValue(key, out var otherValue) || !s_valueComparer.Equals(value, otherValue))
-                {
-                    return false;
-                }
-            }
-
             return true;
         }
 
-        /// <inheritdoc/>
-        public override int GetHashCode(IDictionary<string, string> obj)
+        if (x is null || y is null || x.Count != y.Count)
         {
-            if (obj is null)
-            {
-                return 0;
-            }
-
-            var hashCode = default(HashCode);
-            foreach (var (key, value) in obj)
-            {
-                hashCode.Add(key, KeyComparer);
-                if (value is { } v)
-                {
-                    hashCode.Add(v, s_valueComparer);
-                }
-            }
-
-            return hashCode.ToHashCode();
+            return false;
         }
+
+        foreach (var (key, value) in x)
+        {
+            if (!y.TryGetValue(key, out var otherValue) || !s_valueComparer.Equals(value, otherValue))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /// <inheritdoc/>
+    public override int GetHashCode(IDictionary<string, string>? obj)
+    {
+        if (obj is null)
+        {
+            return 0;
+        }
+
+        var hashCode = default(HashCode);
+        foreach (var (key, value) in obj)
+        {
+            hashCode.Add(key, KeyComparer);
+            if (value is { } v)
+            {
+                hashCode.Add(v, s_valueComparer);
+            }
+        }
+
+        return hashCode.ToHashCode();
     }
 }

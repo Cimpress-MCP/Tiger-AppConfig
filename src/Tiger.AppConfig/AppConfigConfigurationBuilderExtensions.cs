@@ -14,64 +14,56 @@
 //   limitations under the License.
 // </copyright>
 
-using System;
-using System.Net.Http;
-using Tiger.AppConfig;
+namespace Microsoft.Extensions.Configuration;
 
-namespace Microsoft.Extensions.Configuration
+/// <summary>Extends the functionality of <see cref="IConfigurationBuilder"/> for AWS AppConfig.</summary>
+public static class AppConfigConfigurationBuilderExtensions
 {
-    /// <summary>Extends the functionality of <see cref="IConfigurationBuilder"/> for AWS AppConfig.</summary>
-    public static class AppConfigConfigurationBuilderExtensions
+    /* note(cosborn)
+     * Lacking dependency injection, we will manage the lifetime of the
+     * inner HTTP handler ourselves.
+     *
+     * Good news, everyone! We only ever contact "localhost", so it can
+     * sit without modification or replacement, and the pooled connection
+     * can retain its default infinite lifetime (`PooledConnectionLifetime`).
+     */
+    static readonly HttpMessageHandler s_handler = new SocketsHttpHandler();
+
+    /// <summary>Adds AWS AppConfig as a configuration source.</summary>
+    /// <param name="builder">The configuration builder to which to add.</param>
+    /// <param name="configurationSection">The name of the configuration section at which to find configuration.</param>
+    /// <returns>The modified configuration builder.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="builder"/> is <see langword="null"/>.</exception>
+    [SuppressMessage("Microsoft.Usage", "CA2000", Justification = "Ownership is passed to the configuration source.")]
+    public static IConfigurationBuilder AddAppConfig(
+        this IConfigurationBuilder builder,
+        string configurationSection = AppConfigOptions.AppConfig)
     {
-        /* note(cosborn)
-         * Lacking dependency injection, we will manage the lifetime of the
-         * inner HTTP handler ourselves.
-         *
-         * Good news, everyone! We only ever contact "localhost", so it can
-         * sit without modification or replacement, and the pooled connection
-         * can retain its default infinite lifetime (`PooledConnectionLifetime`).
-         */
-        static readonly HttpMessageHandler s_handler = new SocketsHttpHandler();
+        ArgumentNullException.ThrowIfNull(builder);
 
-        /// <summary>Adds AWS AppConfig as a configuration source.</summary>
-        /// <param name="builder">The configuration builder to which to add.</param>
-        /// <param name="configurationSection">
-        /// The name of the configuration section at which to find configuration.
-        /// </param>
-        /// <returns>The modified configuration builder.</returns>
-        public static IConfigurationBuilder AddAppConfig(
-            this IConfigurationBuilder builder,
-            string configurationSection = AppConfigOptions.AppConfig)
+        var httpClient = new HttpClient(s_handler, disposeHandler: false);
+        var appConfigOpts = GetOptions(builder, configurationSection);
+        return builder.Add(new AppConfigConfigurationSource(httpClient, appConfigOpts));
+    }
+
+    static AppConfigOptions GetOptions(IConfigurationBuilder builder, string configurationSection)
+    {
+        const string AppConfigConfigurationKey = "TIGER_CONFIGBUILDER_APPCONFIG";
+
+        if (!builder.Properties.TryGetValue(AppConfigConfigurationKey, out var value)
+            || value is not AppConfigOptions appConfigOpts)
         {
-            if (builder is null)
-            {
-                throw new ArgumentNullException(nameof(builder));
-            }
-
-            var httpClient = new HttpClient(s_handler, disposeHandler: false);
-            var appConfigOpts = GetOptions(builder, configurationSection);
-            return builder.Add(new AppConfigConfigurationSource(httpClient, appConfigOpts));
+            /* note(cosborn)
+             * Building the configuration provider is (relatively) expensive, so
+             * we want to avoid doing it more than is necessary. That sort of in-
+             * band-but-untyped communication is exactly what `Properties` is for.
+             */
+            var configuration = builder.AddEnvironmentVariables("AWS_APPCONFIG_EXTENSION_").Build();
+            appConfigOpts = configuration.Get<AppConfigOptions>();
+            configuration.GetSection(configurationSection).Bind(appConfigOpts);
+            builder.Properties.Add(AppConfigConfigurationKey, appConfigOpts);
         }
 
-        static AppConfigOptions GetOptions(IConfigurationBuilder builder, string configurationSection)
-        {
-            const string AppConfigConfigurationKey = "TIGER_CONFIGBUILDER_APPCONFIG";
-
-            if (!builder.Properties.TryGetValue(AppConfigConfigurationKey, out var value)
-                || value is not AppConfigOptions appConfigOpts)
-            {
-                /* note(cosborn)
-                 * Building the configuration provider is (relatively) expensive, so
-                 * we want to avoid doing it more than is necessary. That sort of in-
-                 * band-but-untyped communication is exactly what `Properties` is for.
-                 */
-                var configuration = builder.AddEnvironmentVariables("AWS_APPCONFIG_EXTENSION_").Build();
-                appConfigOpts = configuration.Get<AppConfigOptions>();
-                configuration.GetSection(configurationSection).Bind(appConfigOpts);
-                builder.Properties.Add(AppConfigConfigurationKey, appConfigOpts);
-            }
-
-            return appConfigOpts;
-        }
+        return appConfigOpts;
     }
 }

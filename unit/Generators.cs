@@ -14,30 +14,28 @@
 //   limitations under the License.
 // </copyright>
 
-using System.Collections.Generic;
-using System.Linq;
-using FsCheck;
+using FsCheck.Fluent;
 using Tiger.AppConfig;
 using static System.StringComparison;
+using static FsCheck.Fluent.ArbMap;
 using static Microsoft.Extensions.Configuration.ConfigurationPath;
 
-namespace Test
-{
-    static class Generators
-    {
-        public static Arbitrary<ConfigurationKey> ConfigurationKey { get; } = Arb.Default.NonEmptyString()
-            .Filter(nes => !nes.Get.Contains(KeyDelimiter, Ordinal))
-            .Convert(nes => new ConfigurationKey(nes.Get), ck => NonEmptyString.NewNonEmptyString(ck.ToString()));
+namespace Test;
 
-        public static Arbitrary<AppConfigOptions> AppConfigOptions { get; } = Arb.From(
-            from paths in Arb.Generate<NonEmptyString>().Three()
-            from port in Gen.Choose(80, 5000)
-            select new AppConfigOptions
-            {
-                Application = paths.Item1.Get,
-                Environment = paths.Item2.Get,
-                ConfigurationProfile = paths.Item3.Get,
-                HttpPort = port,
-            });
-    }
+static class Generators
+{
+    public static Arbitrary<ConfigurationKey> ConfigurationKey { get; } = Default.ArbFor<NonEmptyString>()
+        .Filter(nes => !nes.Get.Contains(KeyDelimiter, Ordinal))
+        .Convert(nes => new ConfigurationKey(nes.Get), ck => NonEmptyString.NewNonEmptyString(ck.ToString()));
+
+    public static Arbitrary<AppConfigOptions> AppConfigOptions { get; } = Arb.From(
+        from paths in Default.GeneratorFor<NonEmptyString>().Three()
+        from port in Gen.Choose(80, 5000)
+        select new AppConfigOptions
+        {
+            Application = paths.Item1.Get,
+            Environment = paths.Item2.Get,
+            ConfigurationProfile = paths.Item3.Get,
+            HttpPort = port,
+        });
 }

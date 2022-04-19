@@ -14,21 +14,18 @@
 //   limitations under the License.
 // </copyright>
 
-using System;
+namespace Test;
 
-namespace Test
+public static class SpanExtensions
 {
-    public static class SpanExtensions
+    public static void Deconstruct<TElement>(this ReadOnlySpan<TElement> readOnlySpan, out TElement head, out ReadOnlySpan<TElement> tail)
     {
-        public static void Deconstruct<TElement>(this ReadOnlySpan<TElement> readOnlySpan, out TElement head, out ReadOnlySpan<TElement> tail)
+        if (readOnlySpan.Length == 0)
         {
-            if (readOnlySpan.Length == 0)
-            {
-                throw new ArgumentException("Empty collection cannot be deconstructed.", nameof(readOnlySpan));
-            }
-
-            head = readOnlySpan[0];
-            tail = readOnlySpan[1..];
+            throw new ArgumentException("Empty collection cannot be deconstructed.", nameof(readOnlySpan));
         }
+
+        head = readOnlySpan[0];
+        tail = readOnlySpan[1..];
     }
 }

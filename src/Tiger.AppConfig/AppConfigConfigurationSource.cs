@@ -14,40 +14,20 @@
 //   limitations under the License.
 // </copyright>
 
-using System.Collections.Generic;
-using System.Net.Http;
-using Tiger.AppConfig;
+namespace Microsoft.Extensions.Configuration;
 
-namespace Microsoft.Extensions.Configuration
+/// <summary>A source of AWS AppConfig configuration key/values for an application.</summary>
+/// <param name="HttpClient">A client for communicating with the AWS AppConfig extension.</param>
+/// <param name="Options">The application's options for AWS AppConfig configuration.</param>
+public sealed record class AppConfigConfigurationSource(HttpClient HttpClient, AppConfigOptions Options)
+    : IConfigurationSource
 {
-    /// <summary>A source of AWS AppConfig configuration key/values for an application.</summary>
-    public sealed class AppConfigConfigurationSource
-        : IConfigurationSource
-    {
-        /// <summary>Initializes a new instance of the <see cref="AppConfigConfigurationSource"/> class.</summary>
-        /// <param name="httpClient">A client for communicating with the AWS AppConfig extension.</param>
-        /// <param name="options">The application's configuration options for AWS AppConfig.</param>
-        public AppConfigConfigurationSource(
-            HttpClient httpClient,
-            AppConfigOptions options)
-        {
-            HttpClient = httpClient;
-            Options = options;
-        }
+    /// <summary>
+    /// Gets the equality comparer used to determine whether configuration should be reloaded.
+    /// </summary>
+    public ConfigurationEqualityComparer EqualityComparer { get; } = new();
 
-        /// <summary>Gets a client for communicating with the AWS AppConfig extension.</summary>
-        public HttpClient HttpClient { get; }
-
-        /// <summary>Gets the application's configuration options for AWS AppConfig.</summary>
-        public AppConfigOptions Options { get; }
-
-        /// <summary>
-        /// Gets the equality comparer used to determine whether configuration should be reloaded.
-        /// </summary>
-        public ConfigurationEqualityComparer EqualityComparer { get; } = new();
-
-        /// <inheritdoc/>
-        IConfigurationProvider IConfigurationSource.Build(IConfigurationBuilder builder) =>
-            new AppConfigConfigurationProvider(this);
-    }
+    /// <inheritdoc/>
+    IConfigurationProvider IConfigurationSource.Build(IConfigurationBuilder builder) =>
+        new AppConfigConfigurationProvider(this);
 }

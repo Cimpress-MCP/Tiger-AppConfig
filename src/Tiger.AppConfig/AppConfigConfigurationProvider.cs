@@ -1,5 +1,5 @@
 // <copyright file="AppConfigConfigurationProvider.cs" company="Cimpress, Inc.">
-//   Copyright 2021 Cimpress, Inc.
+//   Copyright 2022 Cimpress, Inc.
 //
 //   Licensed under the Apache License, Version 2.0 (the "License") –
 //   you may not use this file except in compliance with the License.
@@ -229,6 +229,8 @@ public sealed class AppConfigConfigurationProvider
                     break;
                 case { ValueKind: var vk }:
                     throw new FormatException($"Unsupported JSON token '{vk}' was found.");
+                default:
+                    throw new FormatException("Catastropic JSON deserialization error has occurred.");
             }
         }
     }

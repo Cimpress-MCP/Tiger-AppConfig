@@ -1,5 +1,5 @@
 // <copyright file="NormalizationTests.cs" company="Cimpress, Inc.">
-//   Copyright 2021 Cimpress, Inc.
+//   Copyright 2022 Cimpress, Inc.
 //
 //   Licensed under the Apache License, Version 2.0 (the "License") –
 //   you may not use this file except in compliance with the License.
@@ -14,12 +14,6 @@
 //   limitations under the License.
 // </copyright>
 
-using System.Collections.Immutable;
-using System.Text;
-using System.Text.Json;
-using Microsoft.Extensions.Configuration;
-using Moq.Protected;
-using Tiger.AppConfig;
 using static System.Net.HttpStatusCode;
 using static System.Net.Mime.MediaTypeNames;
 

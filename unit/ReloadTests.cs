@@ -1,5 +1,5 @@
 // <copyright file="ReloadTests.cs" company="Cimpress, Inc.">
-//   Copyright 2021 Cimpress, Inc.
+//   Copyright 2022 Cimpress, Inc.
 //
 //   Licensed under the Apache License, Version 2.0 (the "License") –
 //   you may not use this file except in compliance with the License.
@@ -13,9 +13,6 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 // </copyright>
-
-using Microsoft.Extensions.Configuration;
-using Tiger.AppConfig;
 
 namespace Test;
 

@@ -1,0 +1,13 @@
+<Project>
+
+  <Import Project="../Package.props" />
+
+  <PropertyGroup>
+    <VersionPrefix>1.0.0</VersionPrefix>
+    <PackageId>Tiger.AppConfig.AspNetCore</PackageId>
+    <PackageTags>appconfig;application configuration;configuration</PackageTags>
+    <PackageReleaseNotes><![CDATA[➟ Release 1.0.0
+⁃ Everything is new!
+]]></PackageReleaseNotes>
+  </PropertyGroup>
+</Project>

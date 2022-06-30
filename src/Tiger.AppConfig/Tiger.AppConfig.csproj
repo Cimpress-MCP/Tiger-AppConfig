@@ -1,40 +1,27 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>$(TargetFrameworks);netcoreapp3.1</TargetFrameworks>
     <Description>Integrates AWS AppConfig into the Microsoft.Extensions.Configuration ecosystem.</Description>
-    <AssemblyTitle>Tiger AppConfig</AssemblyTitle>
-    <VersionPrefix>1.0.1</VersionPrefix>
-    <Authors>cosborn@cimpress.com</Authors>
-    <AssemblyName>Tiger.AppConfig</AssemblyName>
-    <PackageId>Tiger.AppConfig</PackageId>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <PackageTags>appconfig;application configuration;configuration</PackageTags>
-    <PackageReleaseNotes><![CDATA[➟ Release 1.0.1
-⁃ Configuration is bound in a different order, preventing some options from being overwritten.
-
-➟ Release 1.0.0
-⁃ Everything is new!
-]]></PackageReleaseNotes>
-    <PackageProjectUrl>https://github.com/Cimpress-MCP/Tiger-AppConfig</PackageProjectUrl>
-    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <PackageIcon>tiger_logo.png</PackageIcon>
-    <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/Cimpress-MCP/Tiger-AppConfig.git</RepositoryUrl>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
   </PropertyGroup>
 
+  <Import Project="Package.props" />
+
   <ItemGroup>
-    <None Include="../../tiger_logo.png" Pack="True" PackagePath="" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="6.0.1" />
+    <PackageReference Include="Nito.AsyncEx.Coordination" Version="5.1.2" />
 
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="3.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="3.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="3.1.0" />
-    <PackageReference Include="Nito.AsyncEx.Coordination" Version="5.1.0" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="all" />
 
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="all" />
+    <Using Include="Microsoft.Extensions.Configuration" />
+    <Using Include="Microsoft.Extensions.Primitives" />
+    <Using Include="System.Collections.Immutable" />
+    <Using Include="System.Net.Http.Json" />
+    <Using Include="System.Text.Json" />
+    <Using Include="System.Text.Json.JsonValueKind" Alias="J" />
+    <Using Include="Tiger.AppConfig" />
+    <Using Include="Tiger.AppConfig.Resources" Static="true" />
   </ItemGroup>
 
 </Project>

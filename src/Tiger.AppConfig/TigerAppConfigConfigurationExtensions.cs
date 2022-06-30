@@ -1,5 +1,5 @@
 ﻿// <copyright file="TigerAppConfigConfigurationExtensions.cs" company="Cimpress, Inc.">
-//   Copyright 2021 Cimpress, Inc.
+//   Copyright 2022 Cimpress, Inc.
 //
 //   Licensed under the Apache License, Version 2.0 (the "License") –
 //   you may not use this file except in compliance with the License.
@@ -14,46 +14,36 @@
 //   limitations under the License.
 // </copyright>
 
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
-
 // note(cosborn) Hidden in plain sight to avoid casual misuse of this extension method.
-namespace Tiger.AppConfig.Lambda
+namespace Tiger.AppConfig.Lambda;
+
+/// <summary>Extensions to the functionality of the <see cref="IConfiguration"/> interface.</summary>
+public static class TigerAppConfigConfigurationExtensions
 {
-    /// <summary>Extensions to the functionality of the <see cref="IConfiguration"/> interface.</summary>
-    public static class TigerAppConfigConfigurationExtensions
+    /// <summary>
+    /// Blocks execution of a Lambda Function until any instances of <see cref="AppConfigConfigurationProvider"/>
+    /// added to the configuration have completed a reload of configuration from the AppConfig extensions if such
+    /// a reload is in progress when this method is invoked.
+    /// </summary>
+    /// <param name="configuration">The configuration containing the providers for which to wait.</param>
+    /// <param name="cancellationToken">A token to watch for operation cancellation.</param>
+    /// <returns>A task which, when resolved, represents operation completion.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="configuration"/> is <see langword="null"/>.</exception>
+    public static async Task WaitForAppConfigReloadToCompleteAsync(
+        this IConfiguration configuration,
+        CancellationToken cancellationToken = default)
     {
-        /// <summary>
-        /// Blocks execution of a Lambda Function until any instances of <see cref="AppConfigConfigurationProvider"/>
-        /// added to the configuration have completed a reload of configuration from the AppConfig extensions if such
-        /// a reload is in progress when this method is invoked.
-        /// </summary>
-        /// <param name="configuration">The configuration containing the providers for which to wait.</param>
-        /// <param name="cancellationToken">A token to watch for operation cancellation.</param>
-        /// <returns>A task which, when resolved, represents operation completion.</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="configuration"/> is <see langword="null"/>.</exception>
-        public static async Task WaitForAppConfigReloadToCompleteAsync(
-            this IConfiguration configuration,
-            CancellationToken cancellationToken = default)
+        ArgumentNullException.ThrowIfNull(configuration);
+
+        if (configuration is not IConfigurationRoot configurationRoot)
         {
-            if (configuration is null)
-            {
-                throw new ArgumentNullException(nameof(configuration));
-            }
-
-            if (configuration is not IConfigurationRoot configurationRoot)
-            {
-                return;
-            }
-
-            var tasks = configurationRoot
-                .Providers
-                .OfType<AppConfigConfigurationProvider>()
-                .Select(p => p.WaitForReloadToCompleteAsync(cancellationToken));
-            await Task.WhenAll(tasks).ConfigureAwait(false);
+            return;
         }
+
+        var tasks = configurationRoot
+            .Providers
+            .OfType<AppConfigConfigurationProvider>()
+            .Select(p => p.WaitForReloadToCompleteAsync(cancellationToken));
+        await Task.WhenAll(tasks).ConfigureAwait(false);
     }
 }

@@ -5,19 +5,33 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FsCheck.Xunit" Version="3.0.0-alpha5" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
-    <PackageReference Include="Moq" Version="4.16.1" />
-    <PackageReference Include="System.Interactive" Version="5.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
+
+    <PackageReference Include="FsCheck.Xunit" Version="3.0.0-beta2" />
+    <PackageReference Include="Moq" Version="4.17.2" />
+    <PackageReference Include="System.Interactive" Version="6.0.1" />
     <PackageReference Include="xunit" Version="2.4.1" />
 
-    <PackageReference Include="coverlet.collector" Version="3.0.3" PrivateAssets="all" />
-    <PackageReference Include="JunitXml.TestLogger" Version="3.0.87" PrivateAssets="all" />
+    <PackageReference Include="coverlet.collector" Version="3.1.2" PrivateAssets="all" />
+    <PackageReference Include="JunitXml.TestLogger" Version="3.0.110" PrivateAssets="all" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3" PrivateAssets="all" />
 
     <ProjectReference Include="..\src\Tiger.AppConfig\Tiger.AppConfig.csproj" />
 
     <None Update="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+
+    <Using Include="FsCheck" />
+    <Using Include="FsCheck.Fluent" />
+    <Using Include="FsCheck.Fluent.ArbMap" Static="true" />
+    <Using Include="FsCheck.Xunit" />
+    <Using Include="Microsoft.Extensions.Configuration" />
+    <Using Include="Moq" />
+    <Using Include="Moq.Protected" />
+    <Using Include="System.Collections.Immutable" />
+    <Using Include="System.Text" />
+    <Using Include="System.Text.Json" />
+    <Using Include="Tiger.AppConfig" />
+    <Using Include="Xunit" />
   </ItemGroup>
   
 </Project>

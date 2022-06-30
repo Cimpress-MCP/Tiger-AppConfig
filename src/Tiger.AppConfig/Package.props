@@ -1,0 +1,16 @@
+<Project>
+  
+  <Import Project="../Package.props" />
+
+  <PropertyGroup>
+    <VersionPrefix>2.0.0</VersionPrefix>
+    <PackageId>Tiger.AppConfig</PackageId>
+    <PackageTags>appconfig;application configuration;configuration</PackageTags>
+    <PackageReleaseNotes><![CDATA[➟ Release 2.0.0
+⁃ The library has been updated for .NET 6.
+
+➟ Release 1.0.1
+⁃ Configuration is bound in a different order, preventing some options from being overwritten.
+]]></PackageReleaseNotes>
+  </PropertyGroup>
+</Project>

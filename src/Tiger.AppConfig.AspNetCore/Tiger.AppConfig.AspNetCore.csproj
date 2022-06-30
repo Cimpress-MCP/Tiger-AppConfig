@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>A middleware for proper use of AppConfig when integrated with ASP.NET Core.</Description>
+  </PropertyGroup>
+
+  <Import Project="Package.props" />
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+
+    <ProjectReference Include="../Tiger.AppConfig/Tiger.AppConfig.csproj" />
+
+    <Using Include="Microsoft.AspNetCore.Builder" />
+    <Using Include="Microsoft.AspNetCore.Http" />
+    <Using Include="Microsoft.Extensions.Configuration" />
+    <Using Include="Tiger.AppConfig.Lambda" /> 
+  </ItemGroup>
+
+</Project>

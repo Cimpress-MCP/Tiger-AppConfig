@@ -2,32 +2,11 @@
 
   <PropertyGroup>
     <Description>Integrates AWS AppConfig into the Microsoft.Extensions.Configuration ecosystem.</Description>
-    <AssemblyTitle>Tiger AppConfig</AssemblyTitle>
-    <VersionPrefix>2.0.0</VersionPrefix>
-    <Authors>cosborn@cimpress.com</Authors>
-    <AssemblyName>Tiger.AppConfig</AssemblyName>
-    <PackageId>Tiger.AppConfig</PackageId>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <PackageTags>appconfig;application configuration;configuration</PackageTags>
-    <PackageReleaseNotes><![CDATA[➟ Release 2.0.0
-⁃ The library has been updated for .NET 6.
-
-➟ Release 1.0.1
-⁃ Configuration is bound in a different order, preventing some options from being overwritten.
-]]></PackageReleaseNotes>
-    <PackageProjectUrl>https://github.com/Cimpress-MCP/Tiger-AppConfig</PackageProjectUrl>
-    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <PackageIcon>tiger_logo.png</PackageIcon>
-    <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/Cimpress-MCP/Tiger-AppConfig.git</RepositoryUrl>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
   </PropertyGroup>
 
-  <ItemGroup>
-    <None Include="../../tiger_logo.png" Pack="True" PackagePath="" />
+  <Import Project="Package.props" />
 
+  <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="6.0.1" />

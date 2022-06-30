@@ -21,8 +21,16 @@
     <None Update="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
 
     <Using Include="FsCheck" />
+    <Using Include="FsCheck.Fluent" />
+    <Using Include="FsCheck.Fluent.ArbMap" Static="true" />
     <Using Include="FsCheck.Xunit" />
+    <Using Include="Microsoft.Extensions.Configuration" />
     <Using Include="Moq" />
+    <Using Include="Moq.Protected" />
+    <Using Include="System.Collections.Immutable" />
+    <Using Include="System.Text" />
+    <Using Include="System.Text.Json" />
+    <Using Include="Tiger.AppConfig" />
     <Using Include="Xunit" />
   </ItemGroup>
   

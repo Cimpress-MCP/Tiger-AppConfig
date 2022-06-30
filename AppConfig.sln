@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tiger.AppConfig", "src\Tige
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test", "unit\Test.csproj", "{B22237C7-553D-409C-B5E7-4CA9B488F53C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tiger.AppConfig.AspNetCore", "src\Tiger.AppConfig.AspNetCore\Tiger.AppConfig.AspNetCore.csproj", "{A80A7AEC-DA86-4ACE-B402-F71F7A6981C4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{B22237C7-553D-409C-B5E7-4CA9B488F53C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B22237C7-553D-409C-B5E7-4CA9B488F53C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B22237C7-553D-409C-B5E7-4CA9B488F53C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A80A7AEC-DA86-4ACE-B402-F71F7A6981C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A80A7AEC-DA86-4ACE-B402-F71F7A6981C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A80A7AEC-DA86-4ACE-B402-F71F7A6981C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A80A7AEC-DA86-4ACE-B402-F71F7A6981C4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

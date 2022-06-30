@@ -1,5 +1,5 @@
 ﻿// <copyright file="AppConfigConfigurationBuilderExtensions.cs" company="Cimpress, Inc.">
-//   Copyright 2021 Cimpress, Inc.
+//   Copyright 2022 Cimpress, Inc.
 //
 //   Licensed under the Apache License, Version 2.0 (the "License") –
 //   you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ namespace Microsoft.Extensions.Configuration;
 /// <summary>Extends the functionality of <see cref="IConfigurationBuilder"/> for AWS AppConfig.</summary>
 public static class AppConfigConfigurationBuilderExtensions
 {
+    const string LambdaSentinel = "AWS_LAMBDA_FUNCTION_NAME";
+
     /* note(cosborn)
      * Lacking dependency injection, we will manage the lifetime of the
      * inner HTTP handler ourselves.
@@ -40,6 +42,11 @@ public static class AppConfigConfigurationBuilderExtensions
         string configurationSection = AppConfigOptions.AppConfig)
     {
         ArgumentNullException.ThrowIfNull(builder);
+
+        if (!RunningAsLambda())
+        {
+            return builder;
+        }
 
         var httpClient = new HttpClient(s_handler, disposeHandler: false);
         var appConfigOpts = GetOptions(builder, configurationSection);
@@ -66,4 +73,6 @@ public static class AppConfigConfigurationBuilderExtensions
 
         return appConfigOpts;
     }
+
+    static bool RunningAsLambda() => !string.IsNullOrEmpty(Environment.GetEnvironmentVariable(LambdaSentinel));
 }
